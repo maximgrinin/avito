@@ -1,6 +1,21 @@
 from rest_framework import serializers
 
+from avito.settings import BANNED_EMAIL_DOMAINS
 from users.models import User, Location
+
+
+class EmailValidator:
+    def __init__(self):
+        domains = BANNED_EMAIL_DOMAINS
+        if not isinstance(domains, list):
+            domains = [domains]
+
+        self.domains = domains
+
+    def __call__(self, value):
+        for domain in self.domains:
+            if value.endswith(domain):
+                raise serializers.ValidationError(f"Your domain ({domain}) has been banned.")
 
 
 class LocationSerializer(serializers.ModelSerializer):
@@ -41,6 +56,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
         queryset=Location.objects.all(),
         slug_field="name"
     )
+    email = serializers.EmailField(validators=[EmailValidator()])
 
     def is_valid(self, raise_exception=False):
         self._locations = self.initial_data.pop("locations", [])

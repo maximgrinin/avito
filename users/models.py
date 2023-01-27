@@ -1,9 +1,21 @@
+from datetime import date
+
+from dateutil.relativedelta import relativedelta
 from django.contrib.auth.models import AbstractUser
+from django.core.exceptions import ValidationError
 from django.db import models
+
+from avito.settings import MIN_USER_AGE
+
+
+def check_age(value: date):
+    age = relativedelta(date.today(), value).years
+    if age < MIN_USER_AGE:
+        raise ValidationError(f'Your age ({age}) is too small')
 
 
 class Location(models.Model):
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, unique=True)
     lat = models.DecimalField(max_digits=8, decimal_places=6, null=True)
     lng = models.DecimalField(max_digits=8, decimal_places=6, null=True)
 
@@ -28,6 +40,8 @@ class User(AbstractUser):
     role = models.CharField(max_length=10, choices=ROLES, default="member")
     age = models.PositiveIntegerField(null=True)
     locations = models.ManyToManyField(Location)
+    birth_date = models.DateField(validators=[check_age], null=True)
+    email = models.EmailField(unique=True, null=True)
 
     class Meta:
         verbose_name = "Пользователь"

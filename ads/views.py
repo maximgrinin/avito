@@ -14,7 +14,8 @@ from rest_framework.permissions import IsAuthenticated
 from ads.models import Category, Ad, Selection
 from ads.permissions import SelectionUpdatePermission, AdUpdatePermission
 from ads.serializers import SelectionListSerializer, SelectionDetailSerializer, SelectionCreateSerializer, \
-    SelectionUpdateSerializer, SelectionDeleteSerializer, AdDetailSerializer, AdDeleteSerializer, AdUpdateSerializer
+    SelectionUpdateSerializer, SelectionDeleteSerializer, AdDetailSerializer, AdDeleteSerializer, AdUpdateSerializer, \
+    AdCreateSerializer, CategoryCreateSerializer
 from users.models import User
 
 
@@ -24,6 +25,34 @@ def root(request):
     return JsonResponse({
         "status": "ok"
     })
+
+
+class SelectionListView(ListAPIView):
+    queryset = Selection.objects.all()
+    serializer_class = SelectionListSerializer
+
+
+class SelectionDetailView(RetrieveAPIView):
+    queryset = Selection.objects.all()
+    serializer_class = SelectionDetailSerializer
+
+
+class SelectionCreateView(CreateAPIView):
+    queryset = Selection.objects.all()
+    serializer_class = SelectionCreateSerializer
+    permission_classes = [IsAuthenticated]
+
+
+class SelectionUpdateView(UpdateAPIView):
+    queryset = Selection.objects.all()
+    serializer_class = SelectionUpdateSerializer
+    permission_classes = [IsAuthenticated, SelectionUpdatePermission]
+
+
+class SelectionDeleteView(DestroyAPIView):
+    queryset = Selection.objects.all()
+    serializer_class = SelectionDeleteSerializer
+    permission_classes = [IsAuthenticated, SelectionUpdatePermission]
 
 
 class CategoryListView(ListView):
@@ -56,22 +85,9 @@ class CategoryDetailView(DetailView):
         })
 
 
-@method_decorator(csrf_exempt, name='dispatch')
-class CategoryCreateView(CreateView):
-    model = Category
-    fields = ["name"]
-
-    def post(self, request, *args, **kwargs):
-        category_data = json.loads(request.body)
-
-        category = Category.objects.create(
-            name=category_data["name"],
-        )
-
-        return JsonResponse({
-            "id": category.id,
-            "name": category.name,
-        })
+class CategoryCreateView(CreateAPIView):
+    queryset = Category.objects.all()
+    serializer_class = CategoryCreateSerializer
 
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -136,12 +152,14 @@ class AdListView(ListView):
             ads.append({
                 "id": ad.id,
                 "name": ad.name,
-                "author_id": ad.author_id,
-                "author": ad.author.first_name,
+                "author": ad.author_id,
+                # "author_id": ad.author_id,
+                # "author": ad.author.first_name,
                 "price": ad.price,
                 "description": ad.description,
                 "is_published": ad.is_published,
-                "category_id": ad.category_id,
+                "category": ad.category_id,
+                # "category_id": ad.category_id,
                 "image": ad.image.url if ad.image else None,
             })
 
@@ -160,37 +178,9 @@ class AdDetailView(RetrieveAPIView):
     permission_classes = [IsAuthenticated]
 
 
-@method_decorator(csrf_exempt, name='dispatch')
-class AdCreateView(CreateView):
-    model = Ad
-    fields = ["name", "author", "price", "description", "is_published", "category"]
-
-    def post(self, request, *args, **kwargs):
-        ad_data = json.loads(request.body)
-
-        author = get_object_or_404(User, pk=ad_data["author_id"])
-        category = get_object_or_404(Category, pk=ad_data["category_id"])
-
-        ad = Ad.objects.create(
-            name=ad_data["name"],
-            author=author,
-            price=ad_data["price"],
-            description=ad_data["description"],
-            is_published=ad_data["is_published"],
-            category=category,
-        )
-
-        return JsonResponse({
-            "id": ad.id,
-            "name": ad.name,
-            "author_id": ad.author_id,
-            "author": ad.author.first_name,
-            "price": ad.price,
-            "description": ad.description,
-            "is_published": ad.is_published,
-            "category_id": ad.category_id,
-            "image": ad.image.url if ad.image else None,
-        })
+class AdCreateView(CreateAPIView):
+    queryset = Ad.objects.all()
+    serializer_class = AdCreateSerializer
 
 
 class AdUpdateView(UpdateAPIView):
@@ -227,31 +217,3 @@ class AdUploadImageView(UpdateView):
             "category_id": self.object.category_id,
             "image": self.object.image.url if self.object.image else None,
         })
-
-
-class SelectionListView(ListAPIView):
-    queryset = Selection.objects.all()
-    serializer_class = SelectionListSerializer
-
-
-class SelectionDetailView(RetrieveAPIView):
-    queryset = Selection.objects.all()
-    serializer_class = SelectionDetailSerializer
-
-
-class SelectionCreateView(CreateAPIView):
-    queryset = Selection.objects.all()
-    serializer_class = SelectionCreateSerializer
-    permission_classes = [IsAuthenticated]
-
-
-class SelectionUpdateView(UpdateAPIView):
-    queryset = Selection.objects.all()
-    serializer_class = SelectionUpdateSerializer
-    permission_classes = [IsAuthenticated, SelectionUpdatePermission]
-
-
-class SelectionDeleteView(DestroyAPIView):
-    queryset = Selection.objects.all()
-    serializer_class = SelectionDeleteSerializer
-    permission_classes = [IsAuthenticated, SelectionUpdatePermission]

@@ -133,6 +133,11 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 TOTAL_ON_PAGE = 10
 
+MIN_USER_AGE = 9
+BANNED_EMAIL_DOMAINS = [
+    'rambler.ru',
+]
+
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
