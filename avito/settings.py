@@ -38,6 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'rest_framework.authtoken',
+    'rest_framework_simplejwt',
     'ads',
     'users',
 ]
@@ -85,10 +87,6 @@ DATABASES = {
         'HOST': 'localhost',
         'PORT': '5432',
     },
-    'sqlite3': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
 }
 
 
@@ -135,37 +133,16 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 TOTAL_ON_PAGE = 10
 
-# LOGGING = {
-#     'disable_existing_loggers': False,
-#     'version': 1,
-#     'handlers': {
-#         'console': {
-#             # logging handler that outputs log messages to terminal
-#             'class': 'logging.StreamHandler',
-#             'level': 'DEBUG',  # message level to be written to console
-#         },
-#     },
-#     'loggers': {
-#         '': {
-#             # this sets root level logger to log debug and higher level
-#             # logs to console. All other loggers inherit settings from
-#             # root level logger.
-#             'handlers': ['console'],
-#             'level': 'DEBUG',
-#             'propagate': False,  # this tells logger to send logging message
-#                                  # to its parent (will send if set to True)
-#         },
-#         'django.db': {
-#             # django also has database level logging
-#             'level': 'DEBUG',
-#         },
-#     },
-# }
-
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10,
 }
+
+AUTH_USER_MODEL = 'users.User'
