@@ -15,7 +15,7 @@ class UserFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = User
 
-    username = factory.Faker('name')
+    username = factory.Faker('user_name')
 
 
 class AdFactory(factory.django.DjangoModelFactory):
@@ -24,4 +24,4 @@ class AdFactory(factory.django.DjangoModelFactory):
 
     category = factory.SubFactory(CategoryFactory)
     author = factory.SubFactory(UserFactory)
-    price = 1
+    price = factory.Faker('random_int', 1)

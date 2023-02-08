@@ -1,4 +1,5 @@
 import pytest
+# from rest_framework.test import APIClient
 
 
 @pytest.fixture()
@@ -17,3 +18,13 @@ def user_token(client, django_user_model):
         format='json')
 
     return response.data["access"]
+
+
+# @pytest.fixture()
+# def client() -> APIClient:
+#     return APIClient()
+#
+# # тогда в тестах
+# def test_foo(client, user):
+#     client.forse_login(user)
+#     response = client.post(...)
